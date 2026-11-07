@@ -1,0 +1,22 @@
+# runtime artifacts — everything under /data is (re)generated
+/data/*.json
+/data/*.jsonl
+/data/cookie*.txt
+/data/runs/
+/data/chunks/
+/data/_main.js
+
+# python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+build/
+dist/
+
+# os / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
