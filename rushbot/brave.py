@@ -15,7 +15,6 @@ import json
 import os
 import shutil
 import sqlite3
-import sys
 import tempfile
 
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM

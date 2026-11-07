@@ -13,8 +13,8 @@ import time
 
 from .api import ApiError, Client, scoring, wait_for_go
 from .data import Data
-from .knowledge import Knowledge, ctx_key
-from .solve import GUESS, KNOWN, solve
+from .knowledge import Knowledge
+from .solve import KNOWN, solve
 
 RUNS_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "data", "runs")
 

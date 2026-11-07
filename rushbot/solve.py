@@ -21,7 +21,7 @@ from __future__ import annotations
 
 from .data import Data, parse_num
 from .knowledge import Knowledge
-from .resolve import family_rule, value_for
+from .resolve import value_for
 
 KNOWN = "known"
 GUESS = "guess"
@@ -106,7 +106,6 @@ def solve(d: Data, kn: Knowledge, puzzle: dict):
             return _solve_minimap(puzzle, ids)
         if ty == "oddoneout" and len(vals) == len(ids) and len(ids) >= 3:
             # the odd one out is whichever value sits furthest from the rest
-            others_mean = sum(vals.values()) / len(vals)
             best, best_dev = None, -1.0
             for i in ids:
                 rest = [vals[j] for j in ids if j != i]

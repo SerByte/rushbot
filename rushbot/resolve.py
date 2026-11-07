@@ -7,7 +7,6 @@ finally to a blind guess.
 from __future__ import annotations
 
 import math
-import re
 
 from .data import Data, parse_num
 
@@ -281,7 +280,6 @@ RULES = {
     # units ----------------------------------------------------------------
     "unit_health": _unit_health,
     "unit_height": _unit_height,
-    "scale_unit_height": _unit_height,
     "scale_unit_height": _unit_height,
     "unit_souls": _unit_souls,
 }
