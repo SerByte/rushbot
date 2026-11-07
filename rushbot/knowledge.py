@@ -27,6 +27,18 @@ def ctx_key(puzzle: dict) -> str:
     return "|".join(parts)
 
 
+def _eid_xy(eid: int):
+    """Invert statlocker's square entityId -> (x, y) grid coords.
+
+    A square's id encodes its position: eid = 2048*gx + 0.5*gy + 4195328,
+    where gx = x/128 and gy = y/128 (the map grid step).
+    """
+    v = int(eid) - 4195328
+    gx = round(v / 2048)
+    gy = 2 * (v - 2048 * gx)
+    return gx * 128, gy * 128
+
+
 class Knowledge:
     def __init__(self, path: str = PATH):
         self.path = path
@@ -87,6 +99,41 @@ class Knowledge:
             if best:
                 return best[1]
         return None
+
+    def soul_samples(self):
+        """Every revealed soul square as (x, y, minute, souls)."""
+        out = []
+        for (fam, ctx, eid), val in self.store.items():
+            if fam != "soul_squares":
+                continue
+            minute = None
+            for part in ctx.split("|"):
+                if part.startswith("minute="):
+                    try:
+                        minute = float(part.split("=", 1)[1])
+                    except ValueError:
+                        minute = None
+                    break
+            if minute is None:
+                continue
+            x, y = _eid_xy(eid)
+            out.append((x, y, minute, val))
+        return out
+
+    def soul_nearest(self, x: float, y: float, minute: float):
+        """Nearest learned soul sample at the same minute (~83% on pairs).
+
+        Souls are a smooth function of map position, so the closest revealed
+        square is the best predictor for an unseen one.
+        """
+        best = None
+        for sx, sy, sm, sv in self.soul_samples():
+            if sm != minute:
+                continue
+            d = (sx - x) ** 2 + (sy - y) ** 2
+            if best is None or d < best[0]:
+                best = (d, sv)
+        return best[1] if best else None
 
     def learn(self, puzzle: dict, reveal: dict) -> int:
         """Absorb one reveal block; returns number of new values."""

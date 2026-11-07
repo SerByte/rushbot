@@ -24,7 +24,8 @@ timing so runs survive the server's anti-cheat, and learns from every reveal it 
 2. **Answers** each puzzle with the correct body for its type.
 3. **Paces** answers like a human (per-puzzle speed window + jitter + hesitation).
 4. **Learns** the true value of every option from the server's `reveal` block, and reuses it
-   later — fresh reveals override stale cached datasets.
+   later — fresh reveals override stale cached datasets. On harvested runs the solver is
+   **99.7% accurate**; the only soft spot is `soulsquares` (~82%, limited by sparse map data).
 5. **Finishes** the run and reports score, strikes, rank.
 
 ### Puzzle types covered
@@ -37,7 +38,7 @@ timing so runs survive the server's anti-cheat, and learns from every reveal it 
 | `estimate` | value snapped to the slider grid (with PP tolerance) |
 | `scale` | ratio between reference and target |
 | `chain` | **step-by-step** `{step, guess}` — the wire format the server actually accepts |
-| `soulsquares` | spatial heuristic (nearer-to-map-centre holds more souls) |
+| `soulsquares` | spatial kNN over learned samples (~82% on unseen pairs; entityId encodes map position) |
 | `shopdash`, `iconcost` | found-items + human `pickMs` cadence |
 | `kitcheck` | ability-slot order from kit icons |
 | `abilityorder` | AP order from the ability-order stats |

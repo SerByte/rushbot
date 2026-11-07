@@ -46,7 +46,8 @@ def grade(d: Data, kn: Knowledge, puzzle: dict, reveal: dict) -> bool:
         targets = set(int(t) for t in ((puzzle.get("shop") or {}).get("targets") or []))
         return set(body.get("found") or []) == targets
     if ty in ("itemguess", "missingitem"):
-        return set(body.get("found") or []) == set(ans.get("found") or ans.get("order") or [])
+        want = ans.get("found") or ans.get("items") or ans.get("order") or []
+        return set(body.get("found") or []) == set(want)
     if ty in ("estimate", "scale"):
         got = body.get("value")
         want = ans.get("value")
@@ -54,8 +55,14 @@ def grade(d: Data, kn: Knowledge, puzzle: dict, reveal: dict) -> bool:
             return False
         tol = (puzzle.get("estimate") or {}).get("tolerance") or \
               (puzzle.get("scale") or {}).get("tolerance") or {}
-        rel = float(tol.get("value", 0.25)) if tol else 0.25
-        return abs(got - float(want)) <= max(0.2 * abs(float(want)), rel * abs(float(want)))
+        kind = (tol or {}).get("kind")
+        tval = float((tol or {}).get("value", 0.0))
+        diff = abs(float(got) - float(want))
+        if kind == "pp":                     # absolute percentage points
+            return diff <= tval
+        if kind in ("relative", "ratio"):    # fraction of the true value
+            return diff <= tval * abs(float(want))
+        return diff <= 0.2 * abs(float(want))  # unknown -> 20% band
     # pair / oddoneout / reversepick / soulsquares -> order[0] is the pick
     got = (body.get("order") or [None])[0]
     want = (ans.get("order") or [None])[0]
@@ -65,7 +72,15 @@ def grade(d: Data, kn: Knowledge, puzzle: dict, reveal: dict) -> bool:
 def main(path: str) -> None:
     d = Data()
     kn = Knowledge()
-    rows = [json.loads(l) for l in open(path, encoding="utf8")]
+    rows = []
+    for line in open(path, encoding="utf8"):
+        line = line.strip()
+        if not line:
+            continue
+        try:
+            rows.append(json.loads(line))
+        except ValueError:
+            continue
     stats = {}
     misses = {}
     for r in rows:
